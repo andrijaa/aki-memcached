@@ -22,9 +22,6 @@ AkiServer::AkiServer(const std::string& address, const std::string& port, std::s
 {
     signals_.add(SIGINT);
     signals_.add(SIGTERM);
-#if defined(SIGQUIT)
-    signals_.add(SIGQUIT);
-#endif 
     signals_.async_wait(boost::bind(&AkiServer::OnStop, this));
 
     boost::asio::ip::tcp::resolver resolver(io_service_);

@@ -10,11 +10,13 @@
 
 #include <string>
 #include <boost/array.hpp>
+#include <vector>
 
 static int REQUEST_MAGIC_BYTE = 0x80;
 static int RESPONSE_MAGIC_BYTE = 0x81;
         
 typedef boost::array<char, 8192> Buffer;
+typedef std::vector<uint8_t> packet_t;
 
 struct Header
 {
@@ -31,9 +33,9 @@ struct Header
 
 struct Payload
 {
-    Buffer extras;
-    Buffer key;
-    Buffer value;
+    packet_t extras;
+    packet_t key;
+    packet_t value;
 };
 
 class Request 
