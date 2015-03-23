@@ -11,6 +11,12 @@ TcpConnection::TcpConnection(boost::asio::io_service& io_service)
 {
 }
 
+TcpConnection::~TcpConnection()
+{
+    boost::system::error_code ignored_ec;
+    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+}
+
 boost::asio::ip::tcp::socket& TcpConnection::socket()
 {
     return socket_;
@@ -55,6 +61,8 @@ void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t b
     else
     {
         //std::cerr << "Handle read error !" << std::endl;
+        boost::system::error_code ignored_ec;
+        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
     }
 }
 
@@ -71,6 +79,8 @@ void TcpConnection::HandleWrite(const boost::system::error_code& e /*error*/, si
     }
     else
     {
+        boost::system::error_code ignored_ec;
+        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
         //std::cerr << "HandleWrite Error" << std::endl;
     }
 }

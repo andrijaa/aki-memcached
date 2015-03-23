@@ -42,7 +42,7 @@ class AkiServer : private boost::noncopyable
         boost::asio::ip::tcp::acceptor acceptor_;
 
         /// The next connection to be accepted.
-        TcpConnection::ConnectionPointer new_connection_;
+        std::vector<TcpConnection::ConnectionPointer> connections_;
 
         boost::asio::signal_set signals_;
 };

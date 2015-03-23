@@ -17,8 +17,7 @@
 AkiServer::AkiServer(const std::string& address, const std::string& port, std::size_t thread_pool_size)
 : thread_pool_size_(thread_pool_size),
     signals_(io_service_),
-    acceptor_(io_service_),
-    new_connection_()
+    acceptor_(io_service_)
 {
     signals_.add(SIGINT);
     signals_.add(SIGTERM);
@@ -40,8 +39,7 @@ void AkiServer::Run()
     std::vector<boost::shared_ptr<boost::thread> > threads;
     for (std::size_t i = 0; i < thread_pool_size_; ++i)
     {
-        boost::shared_ptr<boost::thread> thread(new boost::thread(
-            boost::bind(&boost::asio::io_service::run, &io_service_)));
+        boost::shared_ptr<boost::thread> thread(new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_)));
         threads.push_back(thread);
     }
     std::cerr << "Aki Server started!" << std::endl;
@@ -55,9 +53,10 @@ void AkiServer::Run()
 
 void AkiServer::StartAccept()
 {
-    new_connection_.reset(new TcpConnection(io_service_));  
-    acceptor_.async_accept(new_connection_->socket(), 
-            boost::bind(&AkiServer::OnConnectionAccepted, this, new_connection_, boost::asio::placeholders::error));
+    TcpConnection::ConnectionPointer new_connection(new TcpConnection(io_service_));  
+    connections_.push_back( new_connection );
+    acceptor_.async_accept(new_connection->socket(), 
+       boost::bind(&AkiServer::OnConnectionAccepted, this, new_connection, boost::asio::placeholders::error));
 }
 
 void AkiServer::OnConnectionAccepted(TcpConnection::ConnectionPointer new_connection, const boost::system::error_code& error)
@@ -65,14 +64,14 @@ void AkiServer::OnConnectionAccepted(TcpConnection::ConnectionPointer new_connec
     std::cerr <<" OnConnectionAccepted!" << " Thread id= " << getThreadId() <<  std::endl;
     if (!error)
     {
-        new_connection_->Start();
+        new_connection->Start();
     }
     StartAccept();
 }
 
 void AkiServer::OnStop()
 {
-    std::cerr <<" AkiService::OnStop" << std::endl;
-    io_service_.stop();
+    std::cerr <<" AkiServer::OnStop" << std::endl;
+    exit(0);
 }
 

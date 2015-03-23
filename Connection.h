@@ -21,6 +21,8 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>, priv
 
         /// Construct a connection with the given io_service.
         explicit TcpConnection(boost::asio::io_service& io_service);
+        
+        ~TcpConnection();
 
         boost::asio::ip::tcp::socket& socket();
 
