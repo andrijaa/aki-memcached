@@ -17,7 +17,6 @@ int main(int argc, char* argv[])
           std::cerr << "Usage: AkiServer <host> <port> <num-threads> \n";
           return 1;
       }
-
       
       // Initialise the server.
       std::size_t num_threads = NUM_THREADS;
@@ -32,7 +31,6 @@ int main(int argc, char* argv[])
       }
 
       std::cerr <<"AkiServer starting @ host = " << server_host << ":" << server_port << " with " << num_threads << " threads." <<  std::endl;
-      std::cerr <<"Main thread ID -> " << getThreadId() << std::endl;
 
       AkiServer aki_server(server_host, server_port, num_threads);
       aki_server.Run();
