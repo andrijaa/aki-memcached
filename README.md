@@ -15,7 +15,7 @@ Simple server supporting SET/GET memcached protocol
  - run "make"
 
 ###Run
- - Command line: AkiServer <<host>> <<port>> <<num-threads>>
+ - Command line: AkiServer <host\> <port\> <num-threads\>
 
  - Example: "./AkiServer"   .... runs server with defaults 127.0.0.1:11211 with 8 threads
  - Example: "./AkiServer localhost 13131 16"
