@@ -3,6 +3,8 @@
 
 #include <unordered_map>
 #include <boost/asio/deadline_timer.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include <string>
 
 #include "Protocol.h"
@@ -32,6 +34,8 @@ class Cache
 
         typedef std::unordered_map< std::string, ValueType> CacheSet;
         CacheSet cache_;
+
+        boost::mutex cache_mutex_;
 
 };
 

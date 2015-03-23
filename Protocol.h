@@ -12,8 +12,11 @@
 #include <boost/array.hpp>
 #include <vector>
 
-static int REQUEST_MAGIC_BYTE = 0x80;
-static int RESPONSE_MAGIC_BYTE = 0x81;
+static uint8_t REQUEST_MAGIC_BYTE = 0x80;
+static uint8_t RESPONSE_MAGIC_BYTE = 0x81;
+
+static uint8_t  GET_COMMAND = 0x00;
+static uint8_t  SET_COMMAND = 0x01;
         
 typedef boost::array<char, 8192> Buffer;
 typedef std::vector<uint8_t> packet_t;
@@ -52,6 +55,8 @@ class Packet
     public:
         bool IsGetCommand() const;
         bool IsSetCommand() const;
+        
+        void setCommand( const uint8_t command);
 
         std::string getKey() const;
         std::string getValue() const;
@@ -61,6 +66,8 @@ class Packet
 
         void setKey(const std::string key);
         void setValue(const std::string value);
+
+        void setExtras( const char* buffer, size_t size);
 
     protected:
         Header header_;

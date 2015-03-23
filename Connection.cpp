@@ -4,6 +4,7 @@
 #include <Connection.h>
 #include <Cache.h>
 #include <Protocol.h>
+#include <Utils.h>
 
 TcpConnection::TcpConnection(boost::asio::io_service& io_service)
 : socket_(io_service), strand_(io_service)
@@ -35,7 +36,8 @@ void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t b
             if( Cache::Instance()->ProcessCommand(request, response) )
             {
                 response.Format( write_buffer_ ); 
-                socket_.async_write_some(boost::asio::buffer(write_buffer_), 
+                std::cerr << " Write buffer = " << PrintHex( &write_buffer_[0], write_buffer_.size())  << std::endl;
+                boost::asio::async_write(socket_, boost::asio::buffer(write_buffer_), 
                         strand_.wrap(boost::bind(&TcpConnection::HandleWrite, shared_from_this(),
                                 boost::asio::placeholders::error,
                                 boost::asio::placeholders::bytes_transferred))
@@ -44,17 +46,35 @@ void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t b
         }
         else 
         {       
-            socket_.async_write_some(boost::asio::buffer(read_buffer_),
+            socket_.async_read_some(boost::asio::buffer(read_buffer_),
                 strand_.wrap( boost::bind(&TcpConnection::HandleRead, shared_from_this(),
                 boost::asio::placeholders::error,
                 boost::asio::placeholders::bytes_transferred))
             );
         }
     }
+    else
+    {
+        std::cerr << "Error!" << std::endl;
+    }
 }
 
 
-void TcpConnection::HandleWrite(const boost::system::error_code& /*error*/, size_t bytes_transferred/*bytes_transferred*/)
+void TcpConnection::HandleWrite(const boost::system::error_code& e /*error*/, size_t bytes_transferred/*bytes_transferred*/)
 {
+    if (!e)
+    {
     std::cerr << "Finished writing! " << bytes_transferred << std::endl;
+    socket_.async_read_some(boost::asio::buffer(read_buffer_),
+            strand_.wrap( boost::bind(&TcpConnection::HandleRead, shared_from_this(),
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred))
+            );
+    }
+    else
+    {
+        std::cerr << "HandleWrite Error" << std::endl;
+    }
+
+
 }

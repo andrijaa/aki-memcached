@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Cache.h"
 
 Cache::Cache()
@@ -33,7 +35,6 @@ bool Cache::Set( const std::string key, const std::string value, const uint64_t 
     ValueType value_info;
     value_info.value = value;
 
-    // TODO: implement CAS
     cache_[key] = value_info;
     return true;
 }
@@ -42,21 +43,30 @@ bool Cache::ProcessCommand(const Request& request, Response& response)
 {
     if (request.IsGetCommand())
     {
-        std::string value = Get( request.getKey() );
-        response.InitFrom( request );
+        std::cerr << " Get Command ! " << std::endl;
+        std::string value;
+        {
+            boost::mutex::scoped_lock lock( cache_mutex_ );
+            value = Get( request.getKey() );
+        }
+        std::cerr << " Value = " << value << std::endl;
+        response.setCommand( GET_COMMAND );
+        char extras[4] = {0x00, 0x00, 0x00, 0x00};
+        response.setExtras( extras, 4);       
         response.setValue( value );       
         return true;
     }
 
     if (request.IsSetCommand())
     {
-        // TODO: add support for expiration
-        Set( request.getKey(), request.getValue(), UINT64_MAX ); 
-        response.InitFrom( request );
+        std::cerr << " Set Command ! " << std::endl;
+        {
+            boost::mutex::scoped_lock lock( cache_mutex_ );
+            Set( request.getKey(), request.getValue(), UINT64_MAX ); 
+        }
+        response.setCommand( SET_COMMAND );
         return true;
     } 
-
-    // TODO: support more commands
 
     return false;   
 }

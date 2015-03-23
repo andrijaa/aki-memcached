@@ -9,12 +9,17 @@
 
 #include "Protocol.h"
 #include "Connection.h"
+#include "Utils.h"
 
 Packet::Packet()
 {
     header_.key_length = 0;
     header_.extras_length = 0;
     header_.body_length = 0;
+    header_.data_type = 0x00;
+    header_.status = 0x0000;
+    header_.opaque = 0x00000000;
+    header_.cas = 0;
 }
 
 Packet::~Packet()
@@ -22,14 +27,26 @@ Packet::~Packet()
 
 }
 
+void Packet::setExtras( const char* extras, size_t size)
+{
+    payload_.extras.resize(size);
+    memcpy( &payload_.extras[0], extras, size );
+    header_.extras_length = size;
+}
+
+void Packet::setCommand( const uint8_t command )
+{
+    header_.opcode = command;
+}
+
 bool Packet::IsGetCommand() const
 {
-    return header_.opcode == 0x00;
+    return header_.opcode == GET_COMMAND;
 }
 
 bool Packet::IsSetCommand() const
 {
-    return header_.opcode == 0x01;
+    return header_.opcode == SET_COMMAND;
 }
 
 std::string Packet::getKey() const
@@ -77,7 +94,7 @@ void Packet::setValue( const std::string value)
     {
         payload_.value.resize( value.size() );
         memcpy( &payload_.value[0], value.data(), value.size() );
-        header_.body_length = header_.key_length + value.size();
+        header_.body_length = header_.key_length + header_.extras_length + value.size();
     }
 }
 
@@ -136,26 +153,30 @@ void Packet::Format( packet_t& buffer )
     header.body_length= htonl( header.body_length ); 
     header.opaque= htonl( header.opaque); 
     header.cas= htonll( header.cas ); 
-    memcpy(&buffer[0], (void*)&header, sizeof(Header));
+    buffer.resize(sizeof(Header));
+    memcpy(&buffer[0], &header, sizeof(Header));
 
     // Copy extras
     uint8_t* extras_start = (uint8_t*)(&buffer[0] + sizeof(Header));
     if (!payload_.extras.empty())
     {
+        buffer.resize(buffer.size() + payload_.extras.size());
         memcpy( extras_start, &payload_.extras[0], payload_.extras.size() );
     }
 
     // Copy key
-    uint8_t* key_start = (uint8_t*)(extras_start + payload_.extras.size());
+    uint8_t* key_start = (uint8_t*)(&buffer[0] + (sizeof(Header) + payload_.extras.size()));
     if (!payload_.key.empty())
     {
+        buffer.resize(buffer.size() + payload_.key.size());
         memcpy( key_start, &payload_.key[0], payload_.key.size() );
     }
 
     // Copy value
-    if (!payload_.key.empty())
+    if (!payload_.value.empty())
     {
-        uint8_t* value_start = (uint8_t*)(key_start + payload_.key.size());
+        buffer.resize(buffer.size() + payload_.value.size());
+        uint8_t* value_start = (uint8_t*)(&buffer[0] + (sizeof(Header) + payload_.key.size() + payload_.extras.size()));
         memcpy( value_start, &payload_.value[0], payload_.value.size() );
     }
  }
