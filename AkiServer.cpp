@@ -71,7 +71,6 @@ void AkiServer::OnConnectionAccepted(TcpConnection::ConnectionPointer new_connec
 
 void AkiServer::OnStop()
 {
-    std::cerr <<" AkiServer::OnStop" << std::endl;
     exit(0);
 }
 
