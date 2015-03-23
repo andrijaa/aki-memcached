@@ -27,19 +27,19 @@ all: $(TARGET)
 LDLIBS =   -lpthread \
             -ldl \
             -lresolv \
-			-lssl \
-			-lcrypto
+            -lssl \
+            -lcrypto
 
 LDLIBS += $(BOOST_LIB)
 
 LDFLAGS =   $(STATICFLAG) \
             -Wl,-rpath,$(BIN_DIR) \
-	    	-Wl,--no-undefined
+            -Wl,--no-undefined
 
 CXXFLAGS =  -Wall -g \
             -I. \
             -I.. \
-	    	$(BOOSTINCLUDE)
+            $(BOOSTINCLUDE)
 
 # Disable warnings
 # Disable "...will be re-ordered to match declaration order" warning
@@ -47,17 +47,15 @@ CXXFLAGS += -Wno-reorder \
             -Wno-unused-function \
             -Wno-deprecated \
             -Wno-unused-variable \
-			-m64
+            -m64
 
 SRCS += $(TARGET_SRCS)
 OBJS := $(SRCS:.cpp=.o)
 
 TARGET_OBJS = $(TARGET_SRCS:.cpp=.o)
 
-# This is only in debug mode, in release libigmaster has all of the libraries
 LIBS =  $(LDLIBS) $(TARGET_LDLIBS)
 
-# Use shared libraries for debug build
 $(TARGET) :  $(BIN_DIR) $(OBJS) 
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@  $(LDFLAGS) $(LIBS)
 

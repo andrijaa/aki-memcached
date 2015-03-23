@@ -37,9 +37,9 @@ void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t b
             {
                 response.Format( write_buffer_ ); 
                 boost::asio::async_write(socket_, boost::asio::buffer(write_buffer_), 
-                        strand_.wrap(boost::bind(&TcpConnection::HandleWrite, shared_from_this(),
-                        boost::asio::placeholders::error,
-                        boost::asio::placeholders::bytes_transferred))
+                    strand_.wrap(boost::bind(&TcpConnection::HandleWrite, shared_from_this(),
+                    boost::asio::placeholders::error,
+                    boost::asio::placeholders::bytes_transferred))
                 );
             }
         }
