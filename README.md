@@ -2,24 +2,24 @@
 
 Simple server supporting SET/GET memcached protocol
 
-BUILD/RUN Instructions
+##AkiServer
 
-Requirements 
+###Requirements 
  - requires boost
  - clang
 
-Builds steps 
+###Builds steps 
  - Install boost -> "brew install boost"
  - download source code
  - cd AkiServer
  - run "make"
 
-Run
+###Run
  - "./AkiServer <host> <port> <num-threads>"
 
-AkiClient
-Requirements
+##AkiClient
+###Requirements
  - python
 
-Run
+###Run
  - "python ./AkiClient.py"
