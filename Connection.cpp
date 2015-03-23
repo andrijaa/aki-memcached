@@ -36,12 +36,11 @@ void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t b
             if( Cache::Instance()->ProcessCommand(request, response) )
             {
                 response.Format( write_buffer_ ); 
-                std::cerr << " Write buffer = " << PrintHex( &write_buffer_[0], write_buffer_.size())  << std::endl;
                 boost::asio::async_write(socket_, boost::asio::buffer(write_buffer_), 
                         strand_.wrap(boost::bind(&TcpConnection::HandleWrite, shared_from_this(),
-                                boost::asio::placeholders::error,
-                                boost::asio::placeholders::bytes_transferred))
-                        );
+                        boost::asio::placeholders::error,
+                        boost::asio::placeholders::bytes_transferred))
+                );
             }
         }
         else 
@@ -55,7 +54,7 @@ void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t b
     }
     else
     {
-        std::cerr << "Error!" << std::endl;
+        //std::cerr << "Handle read error !" << std::endl;
     }
 }
 
@@ -64,17 +63,14 @@ void TcpConnection::HandleWrite(const boost::system::error_code& e /*error*/, si
 {
     if (!e)
     {
-    std::cerr << "Finished writing! " << bytes_transferred << std::endl;
-    socket_.async_read_some(boost::asio::buffer(read_buffer_),
-            strand_.wrap( boost::bind(&TcpConnection::HandleRead, shared_from_this(),
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred))
-            );
+        socket_.async_read_some(boost::asio::buffer(read_buffer_),
+           strand_.wrap( boost::bind(&TcpConnection::HandleRead, shared_from_this(),
+           boost::asio::placeholders::error,
+           boost::asio::placeholders::bytes_transferred))
+        );
     }
     else
     {
-        std::cerr << "HandleWrite Error" << std::endl;
+        //std::cerr << "HandleWrite Error" << std::endl;
     }
-
-
 }

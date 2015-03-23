@@ -43,7 +43,9 @@ bool Cache::ProcessCommand(const Request& request, Response& response)
 {
     if (request.IsGetCommand())
     {
-        std::cerr << " Get Command ! " << std::endl;
+        std::cerr << std::endl;
+        std::cerr << " Recv GET Command ! " << std::endl;
+        std::cerr << " Key = " << request.getKey() << std::endl;
         std::string value;
         {
             boost::mutex::scoped_lock lock( cache_mutex_ );
@@ -59,7 +61,10 @@ bool Cache::ProcessCommand(const Request& request, Response& response)
 
     if (request.IsSetCommand())
     {
-        std::cerr << " Set Command ! " << std::endl;
+        std::cerr << std::endl;
+        std::cerr << " Recv SET Command ! " << std::endl;
+        std::cerr << " Key = " << request.getKey() << std::endl;
+        std::cerr << " Value = " << request.getValue() << std::endl;
         {
             boost::mutex::scoped_lock lock( cache_mutex_ );
             Set( request.getKey(), request.getValue(), UINT64_MAX ); 

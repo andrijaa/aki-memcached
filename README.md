@@ -1,26 +1,25 @@
-# Aki Memcached
+# Aki Memcache Server
 
 Simple server supporting SET/GET memcached protocol
 
 BUILD/RUN Instructions
 
-AkiServer
-1. Requirements 
+Requirements 
  - requires boost
  - clang
 
-2. Builds steps 
+Builds steps 
  - Install boost -> "brew install boost"
  - download source code
  - cd AkiServer
  - run "make"
 
-3. Run
+Run
  - "./AkiServer <host> <port> <num-threads>"
 
 AkiClient
-1. Requirements
- - python 2.
+Requirements
+ - python
 
-2. Run
+Run
  - "python ./AkiClient.py"

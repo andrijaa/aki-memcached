@@ -91,7 +91,6 @@ class Response : public Packet
         ~Response();
 
     public:
-        void InitFrom( const Request& request);
         bool IsValid() const;
 };
 

@@ -124,7 +124,6 @@ bool Packet::Parse( const Buffer& buffer )
                 payload_.key.resize( header_.key_length );
                 uint8_t* key_start = (uint8_t*)(buffer.data() + sizeof(Header) + header_.extras_length);
                 memcpy( &payload_.key[0], key_start, header_.key_length);
-                std::cerr<< " Key = " << std::string( (char*)&payload_.key[0], header_.key_length) << std::endl;
             }       
 
             if ( header_.body_length > 0 )
@@ -133,7 +132,6 @@ bool Packet::Parse( const Buffer& buffer )
                 size_t value_size = header_.body_length - (header_.extras_length + header_.key_length);
                 payload_.value.resize( value_size);
                 memcpy( &payload_.value[0], body_start, value_size);
-                std::cerr<< " Value = " << std::string( (char*)&payload_.value[0], value_size) << std::endl;
             }       
 
             return true;
@@ -209,17 +207,6 @@ Response::Response()
 Response::~Response()
 {
 
-}
-
-void Response::InitFrom( const Request& request )
-{
-    header_ = request.getHeader();
-    header_.magic_byte = RESPONSE_MAGIC_BYTE; // Response
-
-    if ( request.IsGetCommand() )
-    {
-         //response 
-    }
 }
 
 bool Response::IsValid() const
