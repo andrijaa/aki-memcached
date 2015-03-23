@@ -32,14 +32,14 @@ bool Request::Parse( const Buffer& buffer )
         {
             if ( header_.extras_length > 0 )
             {
-                payload_.key.resize( header_.key_length );
+                payload_.extras.resize( header_.extras_length );
                 uint8_t* extras_start = (uint8_t*)(buffer.data() + sizeof(Header));
                 memcpy( &payload_.extras[0], extras_start , header_.extras_length);
             }
 
             if ( header_.key_length > 0 )
             {
-                payload_.extras.resize( header_.extras_length );
+                payload_.key.resize( header_.key_length );
                 uint8_t* key_start = (uint8_t*)(buffer.data() + sizeof(Header) + header_.extras_length);
                 memcpy( &payload_.key[0], key_start, header_.key_length);
                 std::cerr<< " Key = " << std::string( (char*)&payload_.key[0], header_.key_length) << std::endl;
