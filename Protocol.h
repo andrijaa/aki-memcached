@@ -38,26 +38,54 @@ struct Payload
     packet_t value;
 };
 
-class Request 
+class Packet
 {
     public:
-        bool Parse( const Buffer& buffer );    
-        bool Format( Buffer&  buffer );    
-        bool IsValid() const;
+        Packet();
+        virtual ~Packet();
 
-    private:
+    public:
+        virtual bool IsValid() const = 0; 
+        bool Parse( const Buffer& buffer );    
+        void Format( packet_t&  buffer );    
+
+    public:
+        bool IsGetCommand() const;
+        bool IsSetCommand() const;
+
+        std::string getKey() const;
+        std::string getValue() const;
+
+        Header getHeader() const;
+        Payload getPayload() const;
+
+        void setKey(const std::string key);
+        void setValue(const std::string value);
+
+    protected:
         Header header_;
         Payload payload_;
 };
 
-class Response 
+class Request : public Packet 
 {
     public:
-        bool IsValid() const;
+        Request();
+        ~Request();
 
-    private:
-        Header header_;
-        Payload payload_;
+    public:
+        bool IsValid() const;
+};
+
+class Response : public Packet 
+{
+    public:
+        Response();
+        ~Response();
+
+    public:
+        void InitFrom( const Request& request);
+        bool IsValid() const;
 };
 
 #endif

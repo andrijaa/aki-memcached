@@ -2,6 +2,7 @@
 #include <boost/bind.hpp>
 
 #include <Connection.h>
+#include <Cache.h>
 #include <Protocol.h>
 
 TcpConnection::TcpConnection(boost::asio::io_service& io_service)
@@ -16,41 +17,38 @@ boost::asio::ip::tcp::socket& TcpConnection::socket()
 
 void TcpConnection::Start()
 {
-    socket_.async_read_some(boost::asio::buffer(buffer_), strand_.wrap(
+    socket_.async_read_some(boost::asio::buffer(read_buffer_), strand_.wrap(
         boost::bind(&TcpConnection::HandleRead, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred))
     );
 }
 
-
 void TcpConnection::HandleRead(const boost::system::error_code& e, std::size_t bytes_read)
 {
-    // 1. Read until a complete request is read
-    // 2. Read until a complete request is read
-
     if (!e)
     {
-        /*        std::stringstream ss;
-        for(int i=0; i<bytes_read; ++i)
-            ss << std::hex << (int)buffer_[i];
-        std::string hex_version = ss.str();
-        std::cerr << hex_version << std::endl; 
-*/
         Request request;
-        if (request.Parse(buffer_))
+        if (request.Parse(read_buffer_))
         {
-            // TODO: parse one by one
-            // TODO: process command
-            // TODO: respond
+            Response response;
+            if( Cache::Instance()->ProcessCommand(request, response) )
+            {
+                response.Format( write_buffer_ ); 
+                socket_.async_write_some(boost::asio::buffer(write_buffer_), 
+                        strand_.wrap(boost::bind(&TcpConnection::HandleWrite, shared_from_this(),
+                                boost::asio::placeholders::error,
+                                boost::asio::placeholders::bytes_transferred))
+                        );
+            }
         }
         else 
         {       
-            socket_.async_read_some(boost::asio::buffer(buffer_),strand_.wrap(
-                        boost::bind(&TcpConnection::HandleRead, shared_from_this(),
-                            boost::asio::placeholders::error,
-                            boost::asio::placeholders::bytes_transferred))
-                    );
+            socket_.async_write_some(boost::asio::buffer(read_buffer_),
+                strand_.wrap( boost::bind(&TcpConnection::HandleRead, shared_from_this(),
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred))
+            );
         }
     }
 }

@@ -41,7 +41,8 @@ class TcpConnection : public boost::enable_shared_from_this<TcpConnection>, priv
         boost::asio::io_service::strand strand_;
 
         // Buffer for incoming data.
-        Buffer buffer_;
+        Buffer read_buffer_;
+        packet_t write_buffer_;
 };
 
 #endif

@@ -10,13 +10,78 @@
 #include "Protocol.h"
 #include "Connection.h"
 
-bool Request::Format(Buffer& buffer)
+Packet::Packet()
 {
-
-   return false; 
+    header_.key_length = 0;
+    header_.extras_length = 0;
+    header_.body_length = 0;
 }
 
-bool Request::Parse( const Buffer& buffer )
+Packet::~Packet()
+{
+
+}
+
+bool Packet::IsGetCommand() const
+{
+    return header_.opcode == 0x00;
+}
+
+bool Packet::IsSetCommand() const
+{
+    return header_.opcode == 0x01;
+}
+
+std::string Packet::getKey() const
+{
+    if ( !payload_.key.empty() )
+    {
+        return std::string( (char*)&payload_.key[0], payload_.key.size() );
+    }
+    return "";
+}
+
+std::string Packet::getValue() const
+{
+    if ( !payload_.value.empty() )
+    {
+        return std::string( (char*)&payload_.value[0], payload_.value.size() );
+    }
+    return "";
+}
+
+Header Packet::getHeader() const
+{
+    return header_;
+}
+
+Payload Packet::getPayload() const
+{
+    return payload_;
+}
+
+void Packet::setKey( const std::string key )
+{
+    if ( !key.empty() )
+    {
+        payload_.key.resize( key.size() );
+        memcpy( &payload_.key[0], key.data(), key.size() );
+        
+        header_.key_length = key.size();
+    }
+}
+
+void Packet::setValue( const std::string value)
+{
+    if ( !value.empty() )
+    {
+        payload_.value.resize( value.size() );
+        memcpy( &payload_.value[0], value.data(), value.size() );
+        header_.body_length = header_.key_length + value.size();
+    }
+}
+
+bool Packet::Parse( const Buffer& buffer )
 {
     if (buffer.size() >= sizeof(Header) )
     {
@@ -61,20 +126,86 @@ bool Request::Parse( const Buffer& buffer )
     return false;
 }
 
+void Packet::Format( packet_t& buffer )
+{
+    // Copy header
+    Header header = header_;
+    // Perform necessary byte reordering 
+    header.key_length = htons( header.key_length ); 
+    header.status = htons( header.status ); 
+    header.body_length= htonl( header.body_length ); 
+    header.opaque= htonl( header.opaque); 
+    header.cas= htonll( header.cas ); 
+    memcpy(&buffer[0], (void*)&header, sizeof(Header));
+
+    // Copy extras
+    uint8_t* extras_start = (uint8_t*)(&buffer[0] + sizeof(Header));
+    if (!payload_.extras.empty())
+    {
+        memcpy( extras_start, &payload_.extras[0], payload_.extras.size() );
+    }
+
+    // Copy key
+    uint8_t* key_start = (uint8_t*)(extras_start + payload_.extras.size());
+    if (!payload_.key.empty())
+    {
+        memcpy( key_start, &payload_.key[0], payload_.key.size() );
+    }
+
+    // Copy value
+    if (!payload_.key.empty())
+    {
+        uint8_t* value_start = (uint8_t*)(key_start + payload_.key.size());
+        memcpy( value_start, &payload_.value[0], payload_.value.size() );
+    }
+ }
+
+Request::Request()
+{
+    header_.magic_byte = REQUEST_MAGIC_BYTE;
+}
+
+Request::~Request()
+{
+
+}
+
 bool Request::IsValid() const
 {
-    // Get
-    return (payload_.extras.empty() && !payload_.key.empty() && !payload_.value.empty());    
+    if ( IsGetCommand() )
+        return (payload_.extras.empty() && !payload_.key.empty() && !payload_.value.empty());    
+    else if ( IsSetCommand() ) 
+        return (!payload_.extras.empty() && !payload_.key.empty() && !payload_.value.empty());    
     
-    // Set
-    return (!payload_.extras.empty() && !payload_.key.empty() && !payload_.value.empty());    
-    
+    return false;
+}
+
+Response::Response()
+{
+    header_.magic_byte = RESPONSE_MAGIC_BYTE;
+}
+
+Response::~Response()
+{
+
+}
+
+void Response::InitFrom( const Request& request )
+{
+    header_ = request.getHeader();
+    header_.magic_byte = RESPONSE_MAGIC_BYTE; // Response
+
+    if ( request.IsGetCommand() )
+    {
+         //response 
+    }
 }
 
 bool Response::IsValid() const
 {
-    // Get
-    return (!payload_.extras.empty() && !payload_.key.empty());    
-    // Set
-    return (!payload_.extras.empty() && !payload_.key.empty() && !payload_.value.empty());    
+    if ( IsGetCommand() )
+        return (!payload_.extras.empty() && !payload_.key.empty());    
+    else if ( IsSetCommand() )
+        return (!payload_.extras.empty() && !payload_.key.empty() && !payload_.value.empty());    
+    return false;
 }
