@@ -19,21 +19,20 @@ Cache* Cache::Instance()
 }
 
 
-std::string Cache::Get( const std::string key ) const
+const packet_t* Cache::Get( const std::string key ) const
 {
     CacheSet::const_iterator it = cache_.find( key );
     if (it != cache_.end())
     {
-        return it->second.value; 
+        return &(it->second.value); 
     }
-    // TODO: return other than "" if not found?
-    return "";
+    return NULL;
 }
 
-bool Cache::Set( const std::string key, const std::string value, const uint64_t expiration ) 
+bool Cache::Set( const std::string key, const packet_t* value, const uint64_t expiration ) 
 {
     ValueType value_info;
-    value_info.value = value;
+    value_info.value = *value;
 
     cache_[key] = value_info;
     return true;
@@ -46,16 +45,14 @@ bool Cache::ProcessCommand(const Request& request, Response& response)
         std::cerr << std::endl;
         std::cerr << " Recv GET Command ! " << std::endl;
         std::cerr << " Key = " << request.getKey() << std::endl;
-        std::string value;
-        {
-            boost::mutex::scoped_lock lock( cache_mutex_ );
-            value = Get( request.getKey() );
-        }
-        std::cerr << " Value = " << value << std::endl;
+        
+        boost::mutex::scoped_lock lock( cache_mutex_ );
+        const packet_t* value = Get( request.getKey() );
+        //std::cerr << " Value = " << std::string(value[ << std::endl;
         response.setCommand( GET_COMMAND );
         char extras[4] = {0x00, 0x00, 0x00, 0x00};
         response.setExtras( extras, 4);       
-        response.setValue( value );       
+        response.setValue( value );
         return true;
     }
 
@@ -64,7 +61,7 @@ bool Cache::ProcessCommand(const Request& request, Response& response)
         std::cerr << std::endl;
         std::cerr << " Recv SET Command ! " << std::endl;
         std::cerr << " Key = " << request.getKey() << std::endl;
-        std::cerr << " Value = " << request.getValue() << std::endl;
+        //std::cerr << " Value = " << request.getValue() << std::endl;
         {
             boost::mutex::scoped_lock lock( cache_mutex_ );
             Set( request.getKey(), request.getValue(), UINT64_MAX ); 

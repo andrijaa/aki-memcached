@@ -59,13 +59,13 @@ class Packet
         void setCommand( const uint8_t command);
 
         std::string getKey() const;
-        std::string getValue() const;
+        const packet_t* getValue() const;
 
         Header getHeader() const;
         Payload getPayload() const;
 
         void setKey(const std::string key);
-        void setValue(const std::string value);
+        void setValue(const packet_t* value);
 
         void setExtras( const char* buffer, size_t size);
 

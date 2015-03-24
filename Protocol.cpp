@@ -58,13 +58,13 @@ std::string Packet::getKey() const
     return "";
 }
 
-std::string Packet::getValue() const
+const packet_t* Packet::getValue() const
 {
     if ( !payload_.value.empty() )
     {
-        return std::string( (char*)&payload_.value[0], payload_.value.size() );
+        return &payload_.value;
     }
-    return "";
+    return NULL;
 }
 
 Header Packet::getHeader() const
@@ -88,13 +88,12 @@ void Packet::setKey( const std::string key )
     }
 }
 
-void Packet::setValue( const std::string value)
+void Packet::setValue( const packet_t* value )
 {
-    if ( !value.empty() )
+    if ( value != NULL )
     {
-        payload_.value.resize( value.size() );
-        memcpy( &payload_.value[0], value.data(), value.size() );
-        header_.body_length = header_.key_length + header_.extras_length + value.size();
+        payload_.value = *value;
+        header_.body_length = header_.key_length + header_.extras_length + value->size();
     }
 }
 
