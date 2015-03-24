@@ -17,6 +17,6 @@ print client.get('Cookie_NotFound')
 
 print client.get('Number')
 
-intArr = pickle.loads( client.get('Array'))
+intArr = client.get('Array')
 
 print ', '.join( map(str, intArr ))

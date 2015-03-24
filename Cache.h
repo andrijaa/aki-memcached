@@ -19,8 +19,8 @@ class Cache
         static Cache* Instance();
 
     public:
-        const packet_t* Get( const std::string key ) const;
-        bool Set( const std::string key, const packet_t* value, const uint64_t expiration);
+        const packet_t* Get( const std::string key, packet_t& extras ) const;
+        bool Set( const std::string key, const packet_t* value, const packet_t* extras,  const uint64_t expiration);
 
         bool ProcessCommand(const Request& request, Response& response);
 
@@ -29,6 +29,7 @@ class Cache
         struct ValueType
         {
             packet_t value;
+            packet_t extras;
             boost::asio::deadline_timer* expiration_timer;
         };
 

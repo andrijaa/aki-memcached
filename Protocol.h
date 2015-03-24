@@ -67,7 +67,7 @@ class Packet
         void setKey(const std::string key);
         void setValue(const packet_t* value);
 
-        void setExtras( const char* buffer, size_t size);
+        void setExtras( const packet_t& extras);
 
     protected:
         Header header_;

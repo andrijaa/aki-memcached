@@ -27,11 +27,10 @@ Packet::~Packet()
 
 }
 
-void Packet::setExtras( const char* extras, size_t size)
+void Packet::setExtras( const packet_t& extras )
 {
-    payload_.extras.resize(size);
-    memcpy( &payload_.extras[0], extras, size );
-    header_.extras_length = size;
+    payload_.extras = extras;
+    header_.extras_length = extras.size();
 }
 
 void Packet::setCommand( const uint8_t command )
