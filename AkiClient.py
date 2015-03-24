@@ -13,6 +13,7 @@ client.set('Array', pickle.dumps(array('l', [1, 2, 3, 4, 5])))
 print client.get('TestKey')
 print client.get('Blah')
 print client.get('Cookie')
+print client.get('Cookie_NotFound')
 
 print client.get('Number')
 

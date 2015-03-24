@@ -95,6 +95,15 @@ void Packet::setValue( const packet_t* value )
         payload_.value = *value;
         header_.body_length = header_.key_length + header_.extras_length + value->size();
     }
+    else
+    {
+        // Not found
+        std::string notFound = "Not found";
+        payload_.value.resize( notFound.size() );
+        memcpy( &payload_.value[0], notFound.data(), notFound.size() );
+        header_.body_length = header_.key_length + header_.extras_length + notFound.size();
+        header_.status = 0x0001;
+    }
 }
 
 bool Packet::Parse( const Buffer& buffer )
