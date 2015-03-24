@@ -8,7 +8,7 @@ client.set('Blah', 'BlahValue')
 client.set('Cookie', 'Ilike')
 
 client.set('Number', 13)
-client.set('Array', pickle.dumps(array('l', [1, 2, 3, 4, 5])))
+client.set('Array', array('l', [1, 2, 3, 4, 5]))
 
 print client.get('TestKey')
 print client.get('Blah')
